@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Ping Pong Ladder User Settings{% end %}
+
+{% block head %}
+
+<script>
+require(["dojo/parser", 
+         "dojo/domReady!", 
+         "dojo/ready", 
+         "dijit/registry",
+         "dijit/layout/BorderContainer", 
+         "dijit/layout/ContentPane", 
+         "dijit/form/Button", 
+         "dojox/validate/web",
+         "dojox/form/Manager",
+         "dijit/form/ValidationTextBox", 
+         "dijit/form/CheckBox",
+         "dojo/dom", 
+         "dojo/on",
+         "dojo/dom-form",
+         "dojo/request",
+         "dojo/_base/fx"],
+function(parser, domReady, ready, registry, BorderContainer, ContentPane, Button, validate, 
+         formManager, ValidationTextBox, CheckBox, dom, on, domForm, request, fx){
+    parser.parse();
+    
+    ready(function() {
+        var messageBar = dom.byId('messageBar');
+        var message = dom.byId('message');
+        
+        var displayname_input = registry.byId('displayname');
+        var email_input = registry.byId('email');
+        var showemail_input = registry.byId('showemail');
+        
+        // Attach the onsubmit event handler of the form
+        var save_user_settings_button = registry.byId('save_user_settings');
+        on(save_user_settings_button, "click", function(evt){
+            form = registry.byId("user_settings_form");
+            
+            if (form.isValid()) {
+                save_user_settings_button.set('disabled', true);
+                
+                // Post the data to the server
+                request.post("/Leaderboard/User-Settings", {
+                    data: domForm.toObject("user_settings_form"),
+                    timeout: 2000,
+                    handleAs: "json"
+                }).then(function(response){
+                    var color = "#888888";
+                    if (response.type == "error") {
+                        color = "#FF9933";
+                    } else if (response.type == "success") {
+                        color = "#99FF33";
+                        
+                        displayname_input.set('value', response.user.displayname);
+                        email_input.set('value', response.user.email);
+                        showemail_input.set('value', response.user.showemail);
+                    }
+                    
+                    save_user_settings_button.set('disabled', false);
+                    
+                    message.innerHTML = response.msg;
+                    
+                    messageBar.style.background = color;
+                    messageBar.style.visibility = "visible";
+                    fx.fadeIn({ node: messageBar, duration: 1 }).play();
+                    
+                    setTimeout(function() {
+                        fx.fadeOut({ node: messageBar, duration: 1000 }).play();
+                    }, 4000);
+                });
+                
+            }
+        });
+    });
+});
+
+</script>
+
+{% end %}
+
+{% block body %}
+
+<div data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'">
+
+	<div id="messageBar">
+	    <center>
+    		<div id="message">Test message</div>
+		</center>
+	</div>
+
+    <form id="user_settings_form" data-dojo-type="dojox/form/Manager">
+
+        <center>
+            <label for="displayname">Display Name:</label>
+            <input id="displayname" name="displayname" type="text" 
+                data-dojo-type="dijit/form/ValidationTextBox" value="{{ user.displayname }}" />
+                
+            <br><br>
+            
+            <label for="email">Email:</label>
+            <input id="email" name="email" type="text" 
+                data-dojo-type="dijit/form/ValidationTextBox" 
+                data-dojo-props="validator:dojox.validate.isEmailAddress, invalidMessage:'This is not a valid email!'" value="{{ user.email }}" />
+                
+            <br><br>
+            
+            <label for="showemail">Show Email:</label>
+            <input id="showemail" name="showemail" type="checkbox"
+                data-dojo-type="dijit/form/CheckBox" value="True" {{ "checked='yes'" if user.showemail else "" }} />
+            
+        </center>
+    
+    </form>
+</div>
+
+{% end %}
+
+{% block action_bar %}
+<div data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'bottom'">
+    <center>
+        <button id="save_user_settings" data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon icon_save'" type="button">Save</button>
+        <button data-dojo-type="dijit/form/Button" onClick="document.location.href = '/Leaderboard';" data-dojo-props="iconClass:'icon icon_cancel'" type="button">Cancel</button>
+    </center>
+</div>
+{% end %}
+
+{% block cookie_crumb_bar %}
+<a href="/Leaderboard">Leaderboard</a> --
+<a href="/Leaderboard/User-Settings">User Settings</a>
+{% end %}

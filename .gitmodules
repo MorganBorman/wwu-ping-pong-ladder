@@ -1,0 +1,6 @@
+[submodule "tornado"]
+	path = tornado
+	url = https://github.com/facebook/tornado.git
+[submodule "trueskill"]
+	path = trueskill
+	url = https://github.com/sublee/trueskill.git

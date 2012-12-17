@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Ping Pong Ladder Record Match{% end %}
+
+{% block head %}
+
+<script src="/static/user_store.js"></script>
+
+<script>
+
+require(["dojo/parser", 
+         "dojo/domReady!", 
+         "dojo/ready", 
+         "dijit/form/FilteringSelect", 
+         "dijit/layout/BorderContainer", 
+         "dijit/layout/ContentPane", 
+         "dijit/form/Button", 
+         "dojox/form/Manager", 
+         "dijit/form/NumberSpinner", 
+         "dojox/validate/web", 
+         "dijit/form/DateTextBox", 
+         "dijit/form/TimeTextBox",
+         "dojo/dom", 
+         "dijit/registry",
+         "dojo/on",
+         "dojo/dom-form",
+         "dojo/request",
+         "dojo/_base/fx"],
+function(parser, domReady, ready, FilteringSelect, BorderContainer, ContentPane, Button, 
+         FormManager, NumberSpinner, ValidateWeb, DateTextBox, TimeTextBox,
+         dom, registry, on, domForm, request, fx) {
+    parser.parse();
+    
+    ready(function() {
+        var messageBar = dom.byId('messageBar');
+        var message = dom.byId('message');
+        
+        var form = registry.byId("record_match_form");
+        var userSelect1 = registry.byId("userSelect1");
+        var userSelect2 = registry.byId("userSelect2");
+        var date_input = registry.byId("date");
+        var time_input = registry.byId("time");
+        
+        function validateOpponents(value, constraints) {
+            return (userSelect1.value != userSelect2.value);
+        }
+        
+        userSelect1.isValid = validateOpponents;
+        userSelect2.isValid = validateOpponents;
+        
+        // Attach the onsubmit event handler of the form
+        var record_match_button = registry.byId('record_match_button');
+        on(record_match_button, "click", function(evt){
+            if (form.validate()) {
+                record_match_button.set('disabled', true);
+                
+                // Post the data to the server
+                request.post("/Leaderboard/Record-Match", {
+                    data: domForm.toObject("record_match_form"),
+                    timeout: 2000,
+                    handleAs: "json"
+                }).then(function(response){
+                    var color = "#888888";
+                    if (response.type == "error") {
+                        color = "#FF9933";
+                    } else if (response.type == "success") {
+                        color = "#99FF33";
+                        
+                        form.reset();
+                        userSelect1.value = {{ user.id }};
+                        userSelect2.set('value', -1);
+                        date_input.set('value', new Date());
+                        time_input.set('value', new Date());
+                        
+                        record_match_button.set('disabled', false);
+                    }
+                    
+                    message.innerHTML = response.msg;
+                    
+                    messageBar.style.background = color;
+                    messageBar.style.visibility = "visible";
+                    fx.fadeIn({ node: messageBar, duration: 1 }).play();
+                    
+                    setTimeout(function() {
+                        fx.fadeOut({ node: messageBar, duration: 1000 }).play();
+                    }, 4000);
+                    
+                });
+                
+            }
+        });
+    });
+});
+
+</script>
+
+{% end %}
+
+{% block body %}
+
+<div data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'">
+
+	<div id="messageBar">
+	    <center>
+    		<div id="message">Test message</div>
+		</center>
+	</div>
+
+    <form data-dojo-type="dojox/form/Manager" id="record_match_form">
+        <center>
+            Choose the opponents.
+            <br>
+            <input data-dojo-type="dijit/form/FilteringSelect" name="userSelect1" id="userSelect1" required="true" value={{ user.id }}
+                    data-dojo-props="store: userStore, searchAttr:'displayname', labelAttr:'displayname', labelType:'html', searchDelay: 400, 
+                                     required:true, invalidMessage:'Opponents must be different users.'" />
+            VS
+            <input data-dojo-type="dijit/form/FilteringSelect" name="userSelect2" id="userSelect2" required="true"
+                    data-dojo-props="store: userStore, searchAttr:'displayname', labelAttr:'displayname', labelType:'html', searchDelay: 400, 
+                                     required:true, invalidMessage:'Opponents must be different users.'" />
+            <br>
+            Choose when the match took place.
+            <br>
+            <input type="text" name="date" id="date" value="now" data-dojo-type="dijit/form/DateTextBox" required="true" />
+            <input type="text" name="time" id="time" value="now" data-dojo-type="dijit/form/TimeTextBox" required="true" />
+            <br><br><br>
+            <fieldset id="game_input">
+                <legend>Games:</legend>
+                
+{% for gnum in range(3) %}
+    {% for pnum in range(2) %}
+                <input class="game_score_input" id="score_g{{ gnum }}_p{{ pnum }}" name="score_g{{ gnum }}_p{{ pnum }}" data-dojo-type="dijit/form/NumberSpinner"  
+                    data-dojo-props="validator:dojox.validate.isInRange, constraints:{ min:0, max:11 }, invalidMessage: 'Game scores must be within the range of 0 to 11.'" 
+                    value='0' />
+    {% end %}
+    <br>
+{% end %}
+                
+            </fieldset>
+        </center>
+    </form>
+</div>
+{% end %}
+
+{% block action_bar %}
+<div data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'bottom'">
+    <center>
+        <button data-dojo-type="dijit/form/Button" id="record_match_button" data-dojo-props="iconClass:'icon icon_record'" type="button">Record</button>
+        <button data-dojo-type="dijit/form/Button" onClick="document.location.href = '/Leaderboard';" data-dojo-props="iconClass:'icon icon_cancel'" type="button">Cancel</button>
+    </center>
+</div>
+{% end %}
+
+{% block cookie_crumb_bar %}
+<a href="/Leaderboard">Leaderboard</a> --
+<a href="/Leaderboard/Record-Match">Record Match</a>
+{% end %}

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Ping Pong Ladder User Details{% end %}
+
+{% block head %}
+<script>
+require(["dojo/parser", "dojo/domReady!", "dijit/layout/BorderContainer", "dijit/layout/ContentPane", "dijit/form/Button", "dojo/dom"],
+function(parser, domReady, BorderContainer, ContentPane, Button, dom){
+    parser.parse();
+    
+    var d = new Date({{ target_match.date }}*1000);
+    dom.byId("match_date").innerHTML = d.toLocaleString();
+    
+    var d = new Date({{ target_match.date_recorded }}*1000);
+    dom.byId("match_recorded_date").innerHTML = "Recorded: " + d.toLocaleString();
+});
+</script>
+{% end %}
+
+{% block body %}
+
+{% from operator import attrgetter %}
+{% set participations = sorted(target_match.participations, key=attrgetter("user.id")) %}
+
+<div data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'">
+
+        <center style="font-size: xx-large;">{{ str( " VS ".join(map(lambda p: p.user.displayname, participations)) ) }}</center>
+        <br>
+        <center style="font-size: 15px;" id="match_date"></center>
+        <center style="font-size: 15px;" id="match_recorded_date"></center>
+        <br>
+        <center>
+            <fieldset id="game_input">
+                <legend>Games:</legend>
+                <table>
+                
+                {% for game in target_match.games %}
+                    <tr>
+                    {% set scores = sorted(game.scores, key=attrgetter("user.id")) %}
+                    {% for score in scores %}
+                        <td style="width: 50px; border-width: 1px; border-style: solid;">
+                            <center>{{ str( score.score ) }}</center>
+                        </td>
+                    {% end %}
+                    </tr>
+                {% end %}
+                </table>
+            </fieldset>
+        </center>
+        
+</div>
+
+{% end %}
+
+{% block action_bar %}{% end %}
+
+{% block cookie_crumb_bar %}
+{% from operator import attrgetter %}
+{% set participations = sorted(target_match.participations, key=attrgetter("user.id")) %}
+
+<a href="/Leaderboard">Leaderboard</a> --
+<a href="/Leaderboard/Match-History">Match History</a> -- 
+<a href="/Leaderboard/Match-History/{{ target_match.id }}">{{ str( " VS ".join(map(lambda p: p.user.displayname, participations)) ) }}</a>
+{% end %}

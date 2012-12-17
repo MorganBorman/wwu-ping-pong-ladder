@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Ping Pong Ladder Match History{% end %}
+
+{% block head %}
+<style>
+@import "//ajax.googleapis.com/ajax/libs/dojo/1.8/dojox/grid/resources/claroGrid.css";
+</style>
+
+<script src="/static/match_store.js"></script>
+<script>
+    require(["dojo/parser", 
+             "dojo/domReady!", 
+             "dojo/ready", 
+             "dojo/on",  
+             "dojo/_base/lang", 
+             "dijit/registry", 
+             "dijit/layout/BorderContainer", 
+             "dijit/layout/ContentPane", 
+             "dijit/form/Button", 
+             "dojox/grid/DataGrid"],
+    function(parser, domReady, ready, on, lang, registry, BorderContainer, ContentPane, Button, DataGrid){
+        parser.parse();
+        
+        ready(function() {
+            //var matches_grid = registry.byId("matches_grid");
+            
+            on(matches_grid, "rowClick", function(evt) {
+                var item = matches_grid.getItem(evt.rowIndex);
+                document.location.href = '/Leaderboard/Match-History/' + item.id;
+            });
+            
+            function dateFormatter(date, rowIndex) {
+                var rowdata = this.grid.getItem(rowIndex);
+                var d = new Date(date*1000);
+                return d.toLocaleString();
+            }
+            
+            function opponentsFormatter(oid, rowIndex) {
+                var rowdata = this.grid.getItem(rowIndex);
+                return rowdata.winner_displayname + " VS " + rowdata.opponent_displayname;
+            }
+            
+            function outcomeFormatter(wscore, rowIndex) {
+                var rowdata = this.grid.getItem(rowIndex);
+                return rowdata.winner_score + ":" + rowdata.opponent_score;
+            }
+            
+            var structure = [
+                {name: 'Date', field: 'date', width: '25%', formatter: dateFormatter},
+                {name: 'Opponents (Victor first)', field: 'opponent_id', width: '60%', formatter: opponentsFormatter},
+                {name: 'Outcome', field: 'winner_score', width: '15%', formatter: outcomeFormatter}
+            ];
+            
+            matches_grid.set('escapeHTMLInData', false);
+            matches_grid.set('structure', structure);
+            matches_grid.setStore(matchStore);
+            matches_grid.startup();
+        });
+    });
+</script>
+
+{% end %}
+
+{% block body %}
+
+<table data-dojo-id="matches_grid" data-dojo-type="dojox/grid/DataGrid" data-dojo-props="region:'center'">
+  <thead>
+    <tr>
+      <th field="date" width="20%">Date</th>
+      <th field="opponents" width="65%">Opponents (Victor first)</th>
+      <th field="outcome" width="15%">Outcome</th>
+    </tr>
+  </thead>
+</table>
+
+{% end %}
+
+{% block action_bar %}{% end %}
+
+{% block cookie_crumb_bar %}
+<a href="/Leaderboard">Leaderboard</a> --
+<a href="/Leaderboard/Match-History">Match History</a>
+{% end %}

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Ping Pong Ladder User Details{% end %}
+
+{% block body %}
+
+<div data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'">
+
+        <center style="font-size: xx-large;">{{ target_user.displayname }}</center>
+        <br>
+
+        {% if target_user.showemail %}
+        <center>{{ target_user.email }}</center>
+        {% end %}
+        
+        <br><br>
+
+        <div id="simplechart" style="width: 90%; height: 150px; margin: 5px auto 0px auto;"></div>
+
+        <script>
+        var rankStore = null;
+
+        require(["dojo/data/ObjectStore", "dojo/store/JsonRest"], function(ObjectStore, JsonRest) {
+            rankStore = new JsonRest({
+                target: "/Leaderboard/{{ target_user.id }}/rank/"
+            });
+        });
+        
+        require(["dojox/charting/Chart", 
+                 "dojox/charting/axis2d/Default", 
+                 "dojox/charting/plot2d/Lines", 
+                 "dojo/ready",
+                 "dojox/charting/StoreSeries"],
+          function(Chart, Default, Lines, ready, StoreSeries){
+          ready(function(){
+            
+            var store_series = new StoreSeries(rankStore, {}, {x: 'timestamp', y: 'rank'});
+            
+            var labelxaxis = function(text, value, precision){
+                var d = new Date(value*1000);
+                return d.toLocaleString();
+                //return d.toDateString();
+            };
+            
+            var chart1 = new Chart("simplechart", {title: "Rating"});
+            chart1.addPlot("default", {type: Lines});
+            chart1.addAxis("x", { labelFunc: labelxaxis });
+            chart1.addAxis("y", { vertical: true });
+            chart1.addSeries("Series 1", store_series);
+            chart1.render();
+          });
+        });
+        </script>
+        
+</div>
+
+{% end %}
+
+{% block action_bar %}{% end %}
+
+{% block cookie_crumb_bar %}
+<a href="/Leaderboard">Leaderboard</a> --
+<a href="/Leaderboard/{{ target_user.id }}">{{ target_user.displayname }}</a>
+{% end %}

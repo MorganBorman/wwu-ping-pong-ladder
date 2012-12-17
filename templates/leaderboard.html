@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Ping Pong Ladder Leaderboard{% end %}
+
+{% block head %}
+<style>
+@import "//ajax.googleapis.com/ajax/libs/dojo/1.8/dojox/grid/resources/claroGrid.css";
+</style>
+
+<script>
+    require(["dojo/parser", 
+             "dojo/domReady!", 
+             "dojo/ready",
+             "dojo/on",  
+             "dojo/_base/lang", 
+             "dijit/layout/BorderContainer", 
+             "dijit/layout/ContentPane", 
+             "dijit/form/Button",
+             "dojox/grid/DataGrid", 
+             "dojo/data/ItemFileWriteStore",
+             "dojo/store/JsonRest",
+             "dojo/data/ObjectStore"],
+    function(parser, domReady, ready, on, lang, BorderContainer, ContentPane, Button, DataGrid, ItemFileWriteStore, JsonRest, ObjectStore){
+        parser.parse();
+        
+        var store = new JsonRest({
+            target: "/Leaderboard/data/"
+        });
+        
+        store = ObjectStore({objectStore: store});
+        
+        ready(function() {
+            on(leaderboard_grid, "rowClick", function(evt) {
+                var item = leaderboard_grid.getItem(evt.rowIndex);
+                document.location.href = '/Leaderboard/' + item.id;
+            });
+            
+            function ratingFormatter(rating, rowIndex) {
+                return rating.toFixed(3);
+            }
+            
+            var structure = [
+                {name: 'Name', field: 'displayname', width: '55%'},
+                {name: 'Games', field: 'games', width: '15%'},
+                {name: 'Rating', field: 'rating', width: '20%', formatter: ratingFormatter}
+            ];
+            
+            leaderboard_grid.set('escapeHTMLInData', false);
+            leaderboard_grid.set('structure', structure);
+            leaderboard_grid.setStore(store);
+            leaderboard_grid.startup();
+        });
+    });
+</script>
+{% end %}
+
+{% block body %}
+<table data-dojo-id="leaderboard_grid" data-dojo-type="dojox/grid/DataGrid" data-dojo-props="region:'center'">
+  <thead>
+    <tr>
+      <th field="displayname" width="55%">Name</th>
+      <th field="games" width="15%">Games</th>
+      <th field="rating" width="20%">Rating</th>
+    </tr>
+  </thead>
+</table>
+{% end %}
+
+{% block action_bar %}
+<div data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'bottom'">
+    <center>
+        <button data-dojo-type="dijit/form/Button" onClick="document.location.href = '/Leaderboard/Record-Match';" data-dojo-props="iconClass:'icon icon_record'" type="button">Record Match</button>
+        <button data-dojo-type="dijit/form/Button" onClick="document.location.href = '/Leaderboard/Match-History';" data-dojo-props="iconClass:'icon icon_history'" type="button">Match History</button>
+        <button data-dojo-type="dijit/form/Button" onClick="document.location.href = '/Leaderboard/User-Settings';" data-dojo-props="iconClass:'icon icon_settings'" type="button">Settings</button>
+    </center>
+</div>
+{% end %}
+
+{% block cookie_crumb_bar %}
+<a href="/Leaderboard">Leaderboard</a>
+{% end %}

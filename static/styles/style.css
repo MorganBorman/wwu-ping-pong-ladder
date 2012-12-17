@@ -1,0 +1,31 @@
+@import "//ajax.googleapis.com/ajax/libs/dojo/1.8/dojo/resources/dojo.css";
+@import "//ajax.googleapis.com/ajax/libs/dojo/1.8/dijit/themes/claro/claro.css";
+@import "icons.css";
+
+html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    padding: 0;
+}
+ 
+#game_input {
+    border: 1px solid;
+    display: inline;
+    padding: 10px;
+}
+
+.game_score_input {
+    width: 50px;
+}
+
+#messageBar {
+    background-color: #555555;
+    margin: -5px -5px 10px -5px;
+    padding: 5px;
+    visibility:hidden;
+}
+
+#message {
+    margin: 0px auto 0px auto;
+}

@@ -1,0 +1,60 @@
+<!DOCTYPE HTML>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>{% block title %}Ping Pong Ladder{% end %}</title>
+
+        <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+
+		<link rel="stylesheet" href="/static/styles/style.css" media="screen">
+        
+		<script>
+			var base = location.href.split("/");
+			base.pop();
+			base = base.join("/") + "/static";
+		
+			 var dojoConfig = {
+					async: true,
+					isDebug: true,
+					packages: [{name: "custom", location: base + "/custom" }]
+			};
+		</script>
+        
+		<script src="//ajax.googleapis.com/ajax/libs/dojo/1.8/dojo/dojo.js"></script>
+		<script src="/static/pingpongladder.js"></script>
+		{% block head %}
+        <script>
+        require(["dojo/parser", "dojo/domReady!", "dijit/layout/BorderContainer", "dijit/layout/ContentPane", "dijit/form/Button"],
+        function(parser, domReady, BorderContainer, ContentPane, Button){
+            parser.parse();
+        })
+        </script>
+		{% end %}
+	</head>
+	<body class="claro">
+        
+		<div data-dojo-type="dijit/layout/BorderContainer" style="width: 100%; height: 100%">
+		
+	        <div data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'top'"><p style="display: inline; font-size: 25px;">{% block title %}Ping Pong Ladder{% end %}</p></div>
+	        
+            <div data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="region:'center'" style="width: 100%; height: 100%">
+            
+                <div data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'top'">{% block login_status %}{% include login_status.html %}{% end %}</div>
+		    
+		        {% block body %}
+                    <div data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'">Body pane</div>
+                {% end %}
+                
+                {% block action_bar %}
+                    <div data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'bottom'">Action bar</div>
+                {% end %}
+                
+		    </div>
+		    
+		    <div data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'bottom'">{% block cookie_crumb_bar %}Cookie crumb bar{% end %}</div>
+		    
+        </div>
+        
+	</body>
+</html>
+

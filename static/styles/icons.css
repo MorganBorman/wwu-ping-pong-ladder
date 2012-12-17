@@ -1,0 +1,31 @@
+.icon {
+  background-repeat: no-repeat;
+  background-size: 18px 18px !important;
+  width: 18px;
+  height: 18px;
+  text-align: center;
+}
+
+.icon_logout {
+    background: url(/static/images/oxygen/logout.png);
+}
+
+.icon_save {
+    background: url(/static/images/oxygen/save.png);
+}
+
+.icon_record {
+    background: url(/static/images/oxygen/record.png);
+}
+
+.icon_history {
+    background: url(/static/images/oxygen/history.png);
+}
+
+.icon_settings {
+    background: url(/static/images/oxygen/settings.png);
+}
+
+.icon_cancel {
+    background: url(/static/images/oxygen/cancel.png);
+}

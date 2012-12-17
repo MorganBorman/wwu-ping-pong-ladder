@@ -1,0 +1,3 @@
+<p style="display: inline; font-size: 15px;">Logged in as {{ user.displayname if user.displayname is not None else "No Display Name" }} ({{ user.username }}).</p>
+<button data-dojo-type="dijit/form/Button" style="float: right;" onClick="document.location.href = '/logout';" data-dojo-props="iconClass:'icon icon_logout'" type="button">Logout</button>
+
